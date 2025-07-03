@@ -5,7 +5,7 @@ Welcome to the **Immersive Panorama Viewer** — a visually stunning, interactiv
 ---
 
 <div align="center">
-  <img src="https://user-images.githubusercontent.com/674621/235753123-360b7e2e-2e2e-4e2e-8e2e-7e2e2e2e2e2e.gif" alt="Panorama Demo" width="80%"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/0/07/Wald_in_Ellmau_am_Wilden_Kaiser%2C_Tirol%2C_360x180%2C_160620%2C_ako.jpg" alt="Panorama Demo" width="80%"/>
 </div>
 
 ---
