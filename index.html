@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Panorama Viewer</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Three.js and Panolens.js for the 360 viewer -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/panolens@0.11.0/build/panolens.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom styles for the viewer and controls */
+        #panorama-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 10;
+        }
+        .control-button {
+            transition: all 0.3s ease;
+        }
+        .control-button:hover {
+            transform: scale(1.1);
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        #upload-overlay {
+            z-index: 20;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white overflow-hidden">
+
+    <!-- Panorama container -->
+    <div id="panorama-container"></div>
+
+    <!-- Upload Overlay -->
+    <div id="upload-overlay" class="absolute inset-0 bg-gray-900 bg-opacity-90 flex flex-col justify-center items-center transition-opacity duration-500 ease-in-out fade-in">
+        <div class="text-center p-8 max-w-lg">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Immersive Panorama Viewer</h1>
+            <p class="text-gray-300 mb-8 text-lg">Upload your 360° panoramic photo to begin the experience. For the best results, use an equirectangular image.</p>
+            <div class="bg-gray-800 border-2 border-dashed border-gray-600 rounded-xl p-8">
+                <input type="file" id="panorama-upload" accept="image/*" class="hidden">
+                <label for="panorama-upload" class="cursor-pointer flex flex-col items-center">
+                    <svg class="w-16 h-16 text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    <span class="text-white font-semibold">Click to upload your panorama</span>
+                    <span class="text-gray-400 text-sm mt-1">PNG, JPG, etc.</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="hidden absolute inset-0 bg-gray-900 bg-opacity-75 flex justify-center items-center z-index-30">
+        <div class="flex flex-col items-center">
+            <svg class="animate-spin h-10 w-10 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-lg font-medium">Loading Panorama...</span>
+        </div>
+    </div>
+
+    <!-- Header / Controls -->
+    <header id="viewer-controls" class="hidden absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20 bg-black bg-opacity-20">
+        <div>
+            <h2 id="photo-title" class="text-xl font-bold">My Panorama</h2>
+            <p id="photo-description" class="text-sm text-gray-300">A beautiful 360° view</p>
+        </div>
+        <div class="flex items-center space-x-2 bg-gray-800 bg-opacity-50 p-2 rounded-full">
+            <button id="vr-button" class="control-button p-3 rounded-full text-white" title="Enter VR Mode">
+                <!-- VR Headset Icon -->
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 12c0-3.866 3.582-7 8-7s8 3.134 8 7v2a4 4 0 01-4 4h-8a4 4 0 01-4-4v-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="7" y="13" width="3" height="2" rx="1" fill="currentColor"/>
+                    <rect x="14" y="13" width="3" height="2" rx="1" fill="currentColor"/>
+                </svg>
+            </button>
+            <button id="fullscreen-button" class="control-button p-3 rounded-full text-white" title="Toggle Fullscreen">
+                <!-- Fullscreen Icon -->
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4h6M4 4v6M20 4h-6M20 4v6M4 20h6M4 20v-6M20 20h-6M20 20v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const panoramaContainer = document.getElementById('panorama-container');
+            const uploadOverlay = document.getElementById('upload-overlay');
+            const panoramaUpload = document.getElementById('panorama-upload');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const viewerControls = document.getElementById('viewer-controls');
+            const vrButton = document.getElementById('vr-button');
+            const fullscreenButton = document.getElementById('fullscreen-button');
+            const photoTitle = document.getElementById('photo-title');
+
+            let viewer;
+
+            // Directly load the panorama
+            uploadOverlay.style.display = 'none';
+            loadingIndicator.style.display = 'flex';
+            photoTitle.textContent = 'Tirol Forest Panorama';
+            initializeViewer('https://upload.wikimedia.org/wikipedia/commons/0/07/Wald_in_Ellmau_am_Wilden_Kaiser%2C_Tirol%2C_360x180%2C_160620%2C_ako.jpg');
+
+            function initializeViewer(imageUrl) {
+                // Initialize the Panolens viewer
+                viewer = new PANOLENS.Viewer({ 
+                    container: panoramaContainer,
+                    autoRotate: true,
+                    autoRotateSpeed: 0.3,
+                    controlBar: false, // We use our own custom controls
+                });
+
+                // Create and add the panorama
+                const panorama = new PANOLENS.ImagePanorama(imageUrl);
+                
+                // Add progress listener
+                panorama.addEventListener('progress', (e) => {
+                    const progress = e.progress.loaded / e.progress.total * 100;
+                    // You can add a progress bar here if you want
+                });
+
+                // Add enter listener
+                panorama.addEventListener('enter', () => {
+                    loadingIndicator.style.display = 'none';
+                    viewerControls.classList.remove('hidden');
+                    viewerControls.classList.add('fade-in');
+                });
+
+                viewer.add(panorama);
+            }
+
+            // VR button functionality
+            vrButton.addEventListener('click', () => {
+                if (viewer && viewer.enterVR) {
+                    try {
+                        viewer.enterVR();
+                    } catch (e) {
+                        alert('VR mode is not supported in this browser or device.');
+                    }
+                } else {
+                    alert('VR mode is not available.');
+                }
+            });
+
+            // Fullscreen button functionality
+            fullscreenButton.addEventListener('click', () => {
+                const elem = panoramaContainer;
+                if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+                    if (elem.requestFullscreen) {
+                        elem.requestFullscreen();
+                    } else if (elem.webkitRequestFullscreen) { /* Safari */
+                        elem.webkitRequestFullscreen();
+                    } else if (elem.mozRequestFullScreen) { /* Firefox */
+                        elem.mozRequestFullScreen();
+                    } else if (elem.msRequestFullscreen) { /* IE/Edge */
+                        elem.msRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
