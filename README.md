@@ -25,13 +25,6 @@ Welcome to the **Immersive Panorama Viewer** — a visually stunning, interactiv
 2. **Open `index.html`** in your favorite browser
 3. **Upload** your 360° panoramic image and enjoy the view!
 
----
-
-## 🖼️ Screenshots
-
-| Upload Overlay | Immersive Viewer |
-|:-------------:|:---------------:|
-| ![Upload Overlay](https://i.imgur.com/2Q2Q2Q2.png) | ![Viewer](https://i.imgur.com/3W3W3W3.png) |
 
 ---
 
