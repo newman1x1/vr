@@ -4,9 +4,7 @@ Welcome to the **Immersive Panorama Viewer** — a visually stunning, interactiv
 
 ---
 
-<div align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/0/07/Wald_in_Ellmau_am_Wilden_Kaiser%2C_Tirol%2C_360x180%2C_160620%2C_ako.jpg" alt="Panorama Demo" width="80%"/>
-</div>
+<a title="Ansgar Koreng" href="https://commons.wikimedia.org/wiki/File:Wald_in_Ellmau_am_Wilden_Kaiser,_Tirol,_360x180,_160620,_ako.jpg"><img width="512" alt="Wald in Ellmau am Wilden Kaiser, Tirol, 360x180, 160620, ako" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Wald_in_Ellmau_am_Wilden_Kaiser%2C_Tirol%2C_360x180%2C_160620%2C_ako.jpg/512px-Wald_in_Ellmau_am_Wilden_Kaiser%2C_Tirol%2C_360x180%2C_160620%2C_ako.jpg?20160710070843"></a>
 
 ---
 
